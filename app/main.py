@@ -1,6 +1,6 @@
 import asyncio
 from fastapi import FastAPI, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 app = FastAPI(title='Task Manager')
@@ -35,7 +35,9 @@ async def health_check():
 
 
 @app.get('/tasks', response_model=list[Task])
-async def get_tasks():
+async def get_tasks(done_only : bool = False):
+    if done_only == True:
+        return [task for task in tasks.values() if task.done]
     return list(tasks.values())
 
 
@@ -43,12 +45,17 @@ async def get_tasks():
 async def get_tasks(task_id: int):
     task = tasks.get(task_id)
     if task is None:
-        raise HTTPException(status_code=404, detail='Task not found')
+        raise HTTPException(status_code=404, detail='task not found')
     return task
 
 
 @app.post('/create-task', response_model=Task)
 async def create_task(payload: TaskCreate):
+    if len(tasks) > 100:
+        raise HTTPExeption(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Достигнут лимит задач",
+        )
     global next_id
     task = Task(
         id=next_id,
