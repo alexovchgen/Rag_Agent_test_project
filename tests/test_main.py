@@ -1,7 +1,5 @@
 from httpx import ASGITransport, AsyncClient
 
-from main import app
-
 import pytest
 
 
