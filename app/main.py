@@ -107,3 +107,7 @@ async def delete_task(task_id: int):
 async def slow_endpoint():
     await asyncio.sleep(10)
     return {'message': 'Done'}
+
+@app.get('/version')
+async def version_endpoint() -> dict[str, str]:
+    return {'version': settings.app_version}
